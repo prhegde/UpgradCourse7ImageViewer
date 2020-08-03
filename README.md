@@ -1,7 +1,10 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+### Image Viewer
 
-Below you will find some information on how to perform common tasks.<br>
-You can find the most recent version of this guide [here](https://github.com/facebook/create-react-app/blob/master/packages/react-scripts/template/README.md).
+As part of course 7 in Upgrad Full Stack Development course, Instagram alike ReactJS web application has been developed.
+
+
+Below README details on the Project usage has been retained as it is, from the initial Code stub provided.
+
 
 ## Table of Contents
 
