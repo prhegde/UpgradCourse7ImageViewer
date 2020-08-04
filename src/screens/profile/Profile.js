@@ -48,7 +48,7 @@ class Profile extends Component {
             props.history.replace('/');
         }
         this.state = {
-            profile_picture: null,
+            profile_picture: 'profile.png',
             username: null,
             full_name: null,
             posts: null,
@@ -79,7 +79,6 @@ class Profile extends Component {
             return response.json();
         }).then((jsonResponse) => {
             that.setState({
-                profile_picture: jsonResponse.data.profile_picture,
                 username: jsonResponse.data.username,
                 full_name: jsonResponse.data.full_name,
                 posts: jsonResponse.data.counts.media,

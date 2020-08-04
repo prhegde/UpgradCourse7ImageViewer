@@ -68,7 +68,7 @@ class Home extends Component{
     this.state = {
       data: [],
       filteredData:[],
-      userData:{},
+      userData:[],
       likeSet:new Set(),
       comments:{},
       currrentComment:""
@@ -76,8 +76,11 @@ class Home extends Component{
   }
 
   componentDidMount(){
-    this.getUserInfo();
-    this.getMediaData();
+    this.getBaseUserInfo();
+
+    this.state.userData.forEach(data => (
+        this.getMediaData(data.id)
+    ));
   }
 
   render(){
@@ -85,7 +88,7 @@ class Home extends Component{
     return(
       <div>
         <Header
-          userProfileUrl={this.state.userData.profile_picture}
+          userProfileUrl="https://www.google.com/search?q=upgrad&sxsrf=ALeKk01ZFseGqQPDNwkMrFmP0_OYfMuSpA:1596537459022&source=lnms&tbm=isch&sa=X&ved=2ahUKEwir_PXArYHrAhXDgeYKHdMkCb8Q_AUoA3oECBkQBQ&biw=1920&bih=1001#imgrc=3UiXqvKqVDjtcM"
           screen={"Home"}
           searchHandler={this.onSearchEntered}
           handleLogout={this.logout}
@@ -172,25 +175,25 @@ class Home extends Component{
     });
   }
 
-  getUserInfo = () => {
+  getBaseUserInfo = () => {
     let that = this;
-    let url = `${constants.userInfoUrl}/?access_token=${sessionStorage.getItem('access-token')}`;
+    let url = `${constants.userInfoUrl}=${sessionStorage.getItem('access-token')}`;
     return fetch(url,{
       method:'GET',
     }).then((response) =>{
         return response.json();
     }).then((jsonResponse) =>{
       that.setState({
-        userData:jsonResponse.data
+        userData: jsonResponse.data
       });
     }).catch((error) => {
       console.log('error user data',error);
     });
   }
 
-  getMediaData = () => {
+  getMediaData = (id) => {
     let that = this;
-    let url = `${constants.userMediaUrl}/?access_token=${sessionStorage.getItem('access-token')}`;
+    let url = `${constants.userMediaUrl}/${id}?fields=id,media_type,media_url,username,timestamp&access_token=&access_token=${sessionStorage.getItem('access-token')}`;
     return fetch(url,{
       method:'GET',
     }).then((response) =>{
@@ -238,15 +241,15 @@ class HomeItem extends Component{
     let ss = createdTime.getSeconds();
 
     let time = dd+"/"+mm+"/"+yyyy+" "+HH+":"+MM+":"+ss;
-    let hashTags = item.tags.map(hash =>{
+    /* let hashTags = item.tags.map(hash =>{
       return "#"+hash;
-    });
+    }); */
     return(
       <div className="home-item-main-container">
         <Card className={classes.card}>
           <CardHeader
             avatar={
-              <Avatar alt="User Profile Pic" src={item.user.profile_picture} className={classes.avatar}/>
+              <Avatar alt="User Profile Pic" src="../../assets/profile.png" className={classes.avatar}/>
             }
             title={item.user.username}
             subheader={time}
@@ -260,9 +263,6 @@ class HomeItem extends Component{
             <div  className={classes.hr}>
               <Typography component="p">
                 {item.caption.text}
-              </Typography>
-              <Typography style={{color:'#4dabf5'}} component="p" >
-                {hashTags.join(' ')}
               </Typography>
             </div>
           </CardContent>

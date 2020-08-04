@@ -5,11 +5,11 @@ import Toolbar from '@material-ui/core/Toolbar';
 import InputBase from '@material-ui/core/InputBase';
 import {withStyles} from '@material-ui/core/styles';
 import SearchIcon from '@material-ui/icons/Search';
-import Avatar from '@material-ui/core/Avatar';
 import IconButton from '@material-ui/core/IconButton';
 import MenuItem from '@material-ui/core/MenuItem';
 import Popover from '@material-ui/core/Popover';
 import { Link } from 'react-router-dom';
+import { Avatar } from '@material-ui/core';
 
 const styles = theme => ({
   grow: {
@@ -66,7 +66,7 @@ class Header extends Component{
   constructor(props){
     super(props);
     this.state = {
-      anchorEl: null,
+      anchorEl: null
     };
   }
 
@@ -91,7 +91,7 @@ class Header extends Component{
             {(screen === "Home" || screen === "Profile")  &&
               <div>
                 <IconButton onClick={this.handleClick}>
-                  <Avatar alt="Profile Pic" src={this.props.userProfileUrl} className={classes.avatar} style={{border: "1px solid #fff"}}/>
+                  <Avatar alt="Profile Pic" src="profile.png" className={classes.avatar} style={{border: "1px solid #fff"}}/>
                 </IconButton>
                 <Popover
                   id="simple-menu"
