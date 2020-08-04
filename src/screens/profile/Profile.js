@@ -4,6 +4,7 @@ import {constants} from '../../common/utils'
 import Header from '../../common/header/Header';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
+import Fab from '@material-ui/core/Fab';
 import Icon from '@material-ui/core/Icon';
 import Modal from '@material-ui/core/Modal';
 import Typography from '@material-ui/core/Typography';
@@ -50,7 +51,7 @@ class Profile extends Component {
         this.state = {
             profile_picture: 'profile.png',
             username: null,
-            full_name: null,
+            full_name: "Pradeep Hegde",
             posts: null,
             follows: null,
             followed_by: null,
@@ -62,47 +63,48 @@ class Profile extends Component {
             currentItem: null,
             likeSet:new Set(),
             comments:{},
+            filteredData:[],
+            userInfo:[]
         }
     }
 
-    componentDidMount() {
-        this.getUserInfo();
-        this.getMediaData();
+    componentDidMount(){
+        this.getBaseUserInfo();
     }
 
-    getUserInfo = () => {
+    getBaseUserInfo = () => {
         let that = this;
-        let url = `${constants.userInfoUrl}/?access_token=${sessionStorage.getItem('access-token')}`;
-        return fetch(url, {
-            method: 'GET',
-        }).then((response) => {
+        let url = `${constants.userInfoUrl}=${sessionStorage.getItem('access-token')}`;
+        return fetch(url,{
+            method:'GET',
+        }).then((response) =>{
             return response.json();
-        }).then((jsonResponse) => {
+        }).then((jsonResponse) =>{
             that.setState({
-                username: jsonResponse.data.username,
-                full_name: jsonResponse.data.full_name,
-                posts: jsonResponse.data.counts.media,
-                follows: jsonResponse.data.counts.follows,
-                followed_by: jsonResponse.data.counts.followed_by
+                userInfo:jsonResponse.data
             });
+            this.state.userInfo.map((data, index) => (
+                this.getMediaData(data.id)
+            ));
         }).catch((error) => {
             console.log('error user data',error);
         });
     }
 
-    getMediaData = () => {
+    getMediaData = (id) => {
         let that = this;
-        let url = `${constants.userMediaUrl}/?access_token=${sessionStorage.getItem('access-token')}`;
+        let url = `${constants.userMediaUrl}/${id}?fields=id,media_type,media_url,username,timestamp&access_token=&access_token=${sessionStorage.getItem('access-token')}`;
         return fetch(url,{
-            method: 'GET',
-        }).then((response) => {
+            method:'GET',
+        }).then((response) =>{
             return response.json();
-        }).then((jsonResponse) => {
+        }).then((jsonResponse) =>{
             that.setState({
-                mediaData: jsonResponse.data
-            });
+                filteredData: this.state.filteredData.concat(jsonResponse),
+                username: jsonResponse.username
+            })
         }).catch((error) => {
-            console.log('error media data',error);
+            console.log('error user data',error);
         });
     }
 
@@ -219,18 +221,18 @@ class Profile extends Component {
                     <Avatar
                         alt="User Image"
                         src={this.state.profile_picture}
-                        style={{width: "50px", height: "50px"}}
+                        style={{width: "90px", height: "90px"}}
                     />
                     <span style={{marginLeft: "20px"}}>
-                        <div style={{width: "600px", fontSize: "big"}}> {this.state.username} <br />
-                            <div style={{float: "left", width: "200px", fontSize: "x-small"}}> Posts: {this.state.posts} </div>
-                            <div style={{float: "left", width: "200px", fontSize: "x-small"}}> Follows: {this.state.follows} </div>
-                            <div style={{float: "left", width: "200px", fontSize: "x-small"}}> Followed By: {this.state.followed_by}</div> <br />
+                        <div style={{width: "600px", fontSize: "big"}}> {this.state.username} <br /><br />
+                            <div style={{float: "left", width: "200px", fontSize: "x-small"}}> Posts: {this.state.userInfo.length} </div>
+                            <div style={{float: "left", width: "200px", fontSize: "x-small"}}> Follows: 5 </div>
+                            <div style={{float: "left", width: "200px", fontSize: "x-small"}}> Followed By: 2 </div> <br />
                         </div>
                         <div style={{fontSize: "small"}}> {this.state.full_name}
-                        <Button mini variant="fab" color="secondary" aria-label="Edit" style={{marginLeft: "20px"}} onClick={this.handleOpenEditModal}>
+                        <Fab mini variant="round" color="secondary" aria-label="Edit" style={{marginLeft: "20px"}} onClick={this.handleOpenEditModal}>
                             <Icon>edit_icon</Icon>
-                        </Button>
+                        </Fab>
                         </div>
                         <Modal
                             aria-labelledby="edit-modal"
@@ -256,15 +258,15 @@ class Profile extends Component {
                     </span>
                 </div>
 
-                {this.state.mediaData != null &&
+                {this.state.filteredData != null &&
                 <GridList cellHeight={'auto'} cols={3} style={{padding: "40px"}}>
-                {this.state.mediaData.map(item => (
+                {this.state.filteredData.map(item => (
                     <GridListTile key={item.id}>
                     <CardMedia
                         id={item.id}
                         style={styles.media}
-                        image={item.images.standard_resolution.url}
-                        title={item.caption.text}
+                        image={item.media_url}
+                        title="Choose only one master - NATURE"
                         onClick={this.handleOpenImageModal}
                     />
                     </GridListTile>

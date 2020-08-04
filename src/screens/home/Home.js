@@ -71,16 +71,13 @@ class Home extends Component{
       userData:[],
       likeSet:new Set(),
       comments:{},
-      currrentComment:""
+      currrentComment:"",
+      userInfo:[]
     }
   }
 
   componentDidMount(){
     this.getBaseUserInfo();
-
-    this.state.userData.forEach(data => (
-        this.getMediaData(data.id)
-    ));
   }
 
   render(){
@@ -88,14 +85,14 @@ class Home extends Component{
     return(
       <div>
         <Header
-          userProfileUrl="https://www.google.com/search?q=upgrad&sxsrf=ALeKk01ZFseGqQPDNwkMrFmP0_OYfMuSpA:1596537459022&source=lnms&tbm=isch&sa=X&ved=2ahUKEwir_PXArYHrAhXDgeYKHdMkCb8Q_AUoA3oECBkQBQ&biw=1920&bih=1001#imgrc=3UiXqvKqVDjtcM"
+          userProfileUrl="profile.png"
           screen={"Home"}
           searchHandler={this.onSearchEntered}
           handleLogout={this.logout}
           handleAccount={this.navigateToAccount}/>
         <div className={classes.grid}>
           <GridList className={classes.gridList} cellHeight={'auto'}>
-            {this.state.filteredData.map(item => (
+            {this.state.filteredData.map((item, index) => (
               <GridListTile key={item.id}>
                 <HomeItem
                   classes={classes}
@@ -184,8 +181,11 @@ class Home extends Component{
         return response.json();
     }).then((jsonResponse) =>{
       that.setState({
-        userData: jsonResponse.data
+        userInfo:jsonResponse.data
       });
+      this.state.userInfo.map((data, index) => (
+          this.getMediaData(data.id)
+      ));
     }).catch((error) => {
       console.log('error user data',error);
     });
@@ -200,9 +200,8 @@ class Home extends Component{
         return response.json();
     }).then((jsonResponse) =>{
       that.setState({
-        data:jsonResponse.data,
-        filteredData:jsonResponse.data
-      });
+        filteredData: this.state.filteredData.concat(jsonResponse)
+      })
     }).catch((error) => {
       console.log('error user data',error);
     });
@@ -230,8 +229,7 @@ class HomeItem extends Component{
   render(){
     const {classes, item, comments} = this.props;
 
-    let createdTime = new Date(0);
-    createdTime.setUTCSeconds(item.created_time);
+    let createdTime = new Date(item.timestamp);
     let yyyy = createdTime.getFullYear();
     let mm = createdTime.getMonth() + 1;
     let dd = createdTime.getDate();
@@ -241,39 +239,39 @@ class HomeItem extends Component{
     let ss = createdTime.getSeconds();
 
     let time = dd+"/"+mm+"/"+yyyy+" "+HH+":"+MM+":"+ss;
-    /* let hashTags = item.tags.map(hash =>{
-      return "#"+hash;
-    }); */
+
     return(
       <div className="home-item-main-container">
         <Card className={classes.card}>
           <CardHeader
             avatar={
-              <Avatar alt="User Profile Pic" src="../../assets/profile.png" className={classes.avatar}/>
+              <Avatar alt="User Profile Pic" src="profile.png" className={classes.avatar}/>
             }
-            title={item.user.username}
+            title={item.username}
             subheader={time}
           />
           <CardContent>
             <CardMedia
-              className={classes.media}
-              image={item.images.standard_resolution.url}
-              title={item.caption.text}
+                className={classes.media}
+                image={item.media_url}
+                title="Choose only one master - NATURE"
             />
-            <div  className={classes.hr}>
+            <div className={classes.hr}>
               <Typography component="p">
-                {item.caption.text}
+                Choose only one master - NATURE
+              </Typography>
+              <Typography style={{color:'#4dabf5'}} component="p" >
+                #Nature #Earth #Peace
               </Typography>
             </div>
           </CardContent>
-
             <CardActions>
               <IconButton aria-label="Add to favorites" onClick={this.onLikeClicked.bind(this,item.id)}>
                 {this.state.isLiked && <FavoriteIconFill style={{color:'#F44336'}}/>}
                 {!this.state.isLiked && <FavoriteIconBorder/>}
               </IconButton>
               <Typography component="p">
-                {item.likes.count} Likes
+                3 Likes
               </Typography>
             </CardActions>
 
