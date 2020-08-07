@@ -97,6 +97,7 @@ class Home extends Component{
                 <HomeItem
                   classes={classes}
                   item={item}
+                  userInfo={this.state.userInfo}
                   onLikedClicked={this.likeClickHandler}
                   onAddCommentClicked={this.addCommentClickHandler}
                   commentChangeHandler={this.commentChangeHandler}
@@ -111,14 +112,14 @@ class Home extends Component{
 
   onSearchEntered = (value) =>{
     console.log('search value', value);
-    let filteredData = this.state.data;
+    let filteredData = this.state.userInfo;
     filteredData = filteredData.filter((data) =>{
-      let string = data.caption.text.toLowerCase();
+      let string = data.caption.toLowerCase();
       let subString = value.toLowerCase();
       return string.includes(subString);
     })
     this.setState({
-      filteredData
+      filteredData: filteredData
     })
   }
 
@@ -227,7 +228,7 @@ class HomeItem extends Component{
   }
 
   render(){
-    const {classes, item, comments} = this.props;
+    const {classes, item, userInfo, comments} = this.props;
 
     let createdTime = new Date(item.timestamp);
     let yyyy = createdTime.getFullYear();
@@ -239,6 +240,14 @@ class HomeItem extends Component{
     let ss = createdTime.getSeconds();
 
     let time = dd+"/"+mm+"/"+yyyy+" "+HH+":"+MM+":"+ss;
+
+    let captionText = '';
+    userInfo.forEach(data => {
+      if (data.id === item.id) {
+        captionText = data.caption;
+        return captionText;
+      }
+    });
 
     return(
       <div className="home-item-main-container">
@@ -258,7 +267,7 @@ class HomeItem extends Component{
             />
             <div className={classes.hr}>
               <Typography component="p">
-                Choose only one master - NATURE
+                {captionText}
               </Typography>
               <Typography style={{color:'#4dabf5'}} component="p" >
                 #Nature #Earth #Peace
@@ -293,7 +302,7 @@ class HomeItem extends Component{
                 <InputLabel htmlFor="comment">Add Comment</InputLabel>
                 <Input id="comment" value={this.state.comment} onChange={this.commentChangeHandler}/>
               </FormControl>
-              <FormControl>
+              <FormControl class="commentAdd">
                 <Button onClick={this.onAddCommentClicked.bind(this,item.id)}
                    variant="contained" color="primary">
                   ADD
