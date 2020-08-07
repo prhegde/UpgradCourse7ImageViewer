@@ -72,7 +72,8 @@ class Home extends Component{
       likeSet:new Set(),
       comments:{},
       currrentComment:"",
-      userInfo:[]
+      userInfo:[],
+      likes: 0
     }
   }
 
@@ -119,34 +120,8 @@ class Home extends Component{
       return string.includes(subString);
     })
     this.setState({
-      filteredData: filteredData
+      userInfo: filteredData
     })
-  }
-
-  likeClickHandler = (id) =>{
-    console.log('like id',id);
-    var foundItem = this.state.data.find((item) => {
-      return item.id === id;
-    })
-
-    if (typeof foundItem !== undefined) {
-      if (!this.state.likeSet.has(id)) {
-        foundItem.likes.count++;
-        this.setState(({likeSet}) => ({
-          likeSet:new Set(likeSet.add(id))
-        }))
-      }else {
-        foundItem.likes.count--;
-        this.setState(({likeSet}) =>{
-          const newLike = new Set(likeSet);
-          newLike.delete(id);
-
-          return {
-            likeSet:newLike
-          };
-        });
-      }
-    }
   }
 
   addCommentClickHandler = (id)=>{
@@ -224,11 +199,14 @@ class HomeItem extends Component{
     this.state = {
       isLiked : false,
       comment:'',
+      likes: 3
     }
   }
 
   render(){
     const {classes, item, userInfo, comments} = this.props;
+
+    // Logic to calculate the time of instagram post and display time format of the posted image
 
     let createdTime = new Date(item.timestamp);
     let yyyy = createdTime.getFullYear();
@@ -241,81 +219,104 @@ class HomeItem extends Component{
 
     let time = dd+"/"+mm+"/"+yyyy+" "+HH+":"+MM+":"+ss;
 
+    // Fetching the caption of the image via the API endpoint result
     let captionText = '';
+    let likeCount = this.state.likes;
     userInfo.forEach(data => {
       if (data.id === item.id) {
         captionText = data.caption;
-        return captionText;
       }
     });
 
-    return(
-      <div className="home-item-main-container">
-        <Card className={classes.card}>
-          <CardHeader
-            avatar={
-              <Avatar alt="User Profile Pic" src="profile.png" className={classes.avatar}/>
-            }
-            title={item.username}
-            subheader={time}
-          />
-          <CardContent>
-            <CardMedia
-                className={classes.media}
-                image={item.media_url}
-                title="Choose only one master - NATURE"
-            />
-            <div className={classes.hr}>
-              <Typography component="p">
-                {captionText}
-              </Typography>
-              <Typography style={{color:'#4dabf5'}} component="p" >
-                #Nature #Earth #Peace
-              </Typography>
-            </div>
-          </CardContent>
-            <CardActions>
-              <IconButton aria-label="Add to favorites" onClick={this.onLikeClicked.bind(this,item.id)}>
-                {this.state.isLiked && <FavoriteIconFill style={{color:'#F44336'}}/>}
-                {!this.state.isLiked && <FavoriteIconBorder/>}
-              </IconButton>
-              <Typography component="p">
-                3 Likes
-              </Typography>
-            </CardActions>
+    if(captionText === '') {
+      return(<div className="home-item-main-container"></div>);
+    } else {
+      return(
+          <div className="home-item-main-container">
+            <Card className={classes.card}>
+              <CardHeader
+                  avatar={
+                    <Avatar alt="User Profile Pic" src="profile.png" className={classes.avatar}/>
+                  }
+                  title={item.username}
+                  subheader={time}
+              />
 
-            <CardContent>
-            {comments.hasOwnProperty(item.id) && comments[item.id].map((comment, index)=>{
-              return(
-                <div key={index} className="row">
-                  <Typography component="p" style={{fontWeight:'bold'}}>
-                    {sessionStorage.getItem('username')}:
+              { /* Media URL value is fetched via the API endpoint and is diplay below using item.media_url query */ }
+              <CardContent>
+                <CardMedia
+                    className={classes.media}
+                    image={item.media_url}
+                    title=""
+                />
+                <div className={classes.hr}>
+                  <Typography component="p">
+
+                    { /*  Fetching the caption of the image via the API endpoint result as per the logic written above */ }
+                    {captionText}
                   </Typography>
-                  <Typography component="p" >
-                    {comment}
+                  <Typography style={{color:'#4dabf5'}} component="p" >
+                    { /*  Hard coding of the hashtags */ }
+                    #Nature #Earth #Peace
                   </Typography>
                 </div>
-              )
-            })}
-            <div className={classes.formControl}>
-              <FormControl style={{flexGrow:1}}>
-                <InputLabel htmlFor="comment">Add Comment</InputLabel>
-                <Input id="comment" value={this.state.comment} onChange={this.commentChangeHandler}/>
-              </FormControl>
-              <FormControl class="commentAdd">
-                <Button onClick={this.onAddCommentClicked.bind(this,item.id)}
-                   variant="contained" color="primary">
-                  ADD
-                </Button>
-              </FormControl>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
+              </CardContent>
+              <CardActions>
+                <IconButton aria-label="Add to favorites" onClick={this.onLikeClicked.bind(this,item.id)}>
+                  {this.state.isLiked && <FavoriteIconFill style={{color:'#F44336'}}/>}
+                  {!this.state.isLiked && <FavoriteIconBorder/>}
+                </IconButton>
+                <Typography component="p">
+
+                  { /*  likeCount value is fetched by the Logic written in the onLikeClicked() method to display the number of likes of each post */ }
+                  {likeCount} likes
+                </Typography>
+              </CardActions>
+
+              <CardContent>
+                {comments.hasOwnProperty(item.id) && comments[item.id].map((comment, index)=>{
+                  return(
+                      <div key={index} className="row">
+                        <Typography component="p" style={{fontWeight:'bold'}}>
+                          {sessionStorage.getItem('username')}:
+                        </Typography>
+                        <Typography component="p" >
+                          {comment}
+                        </Typography>
+                      </div>
+                  )
+                })}
+                <div className={classes.formControl}>
+                  <FormControl style={{flexGrow:1}}>
+                    <InputLabel htmlFor="comment">Add a comment</InputLabel>
+                    <Input id="comment" value={this.state.comment} onChange={this.commentChangeHandler}/>
+                  </FormControl>
+                  <FormControl class="commentAdd">
+                    <Button onClick={this.onAddCommentClicked.bind(this,item.id)}
+                            variant="contained" color="primary">
+                      ADD
+                    </Button>
+                  </FormControl>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+      )
+    }
   }
 
   onLikeClicked = (id) => {
+    // Here, we are converting the likes symbol from white to pink and also incrementing/decrementing the number of likes
+
+    if (!this.state.isLiked) {
+      this.setState({
+        likes: this.state.likes + 1
+      })
+    } else {
+      this.setState({
+        likes: this.state.likes - 1
+      })
+    }
     if (this.state.isLiked) {
       this.setState({
         isLiked:false
@@ -325,7 +326,6 @@ class HomeItem extends Component{
         isLiked:true
       });
     }
-    this.props.onLikedClicked(id)
   }
 
   commentChangeHandler = (e) => {
@@ -336,6 +336,8 @@ class HomeItem extends Component{
   }
 
   onAddCommentClicked = (id) => {
+    // Here, we are adding comments into the comment section
+
     if (this.state.comment === "" || typeof this.state.comment === undefined) {
       return;
     }

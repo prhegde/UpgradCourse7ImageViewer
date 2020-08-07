@@ -64,7 +64,8 @@ class Profile extends Component {
             likeSet:new Set(),
             comments:{},
             filteredData:[],
-            userInfo:[]
+            userInfo:[],
+            likes: 3
         }
     }
 
@@ -117,11 +118,14 @@ class Profile extends Component {
     }
 
     handleOpenImageModal = (event) => {
-        var result = this.state.mediaData.find(item => {
+        var result = this.state.userInfo.find(item => {
+            return item.id === event.target.id
+        })
+        var mediaResult = this.state.filteredData.find(item => {
             return item.id === event.target.id
         })
         console.log(result);
-        this.setState({ imageModalOpen: true, currentItem: result });
+        this.setState({ imageModalOpen: true, currentItem: result, mediaData: mediaResult});
     }
 
     handleCloseImageModal = () => {
@@ -151,30 +155,31 @@ class Profile extends Component {
     }
 
     likeClickHandler = (id) =>{
-      console.log('like id',id);
-      var foundItem = this.state.currentItem;
+        // Here, we are converting the likes symbol from white to pink and also incrementing/decrementing the number of likes
 
-      if (typeof foundItem !== undefined) {
-        if (!this.state.likeSet.has(id)) {
-          foundItem.likes.count++;
-          this.setState(({likeSet}) => ({
-            likeSet:new Set(likeSet.add(id))
-          }))
-        }else {
-          foundItem.likes.count--;
-          this.setState(({likeSet}) =>{
-            const newLike = new Set(likeSet);
-            newLike.delete(id);
-
-            return {
-              likeSet:newLike
-            };
-          });
+        if (!this.state.isLiked) {
+            this.setState({
+                likes: this.state.likes + 1
+            })
+        } else {
+            this.setState({
+                likes: this.state.likes - 1
+            })
         }
-      }
+        if (this.state.isLiked) {
+            this.setState({
+                isLiked:false
+            });
+        }else {
+            this.setState({
+                isLiked:true
+            });
+        }
     }
 
     onAddCommentClicked = (id) => {
+      // Here, we are adding comments into the comment section
+
       console.log('id',id);
       if (this.state.currentComment === "" || typeof this.state.currentComment === undefined) {
         return;
@@ -204,13 +209,7 @@ class Profile extends Component {
     }
 
     render() {
-      let hashTags = []
-      if (this.state.currentItem !== null) {
-        hashTags = this.state.currentItem.tags.map(hash =>{
-          return "#"+hash;
-        });
-        console.log('state',this.state);
-      }
+        let likeCount = this.state.likes;
         return(
             <div>
                 <Header
@@ -266,7 +265,7 @@ class Profile extends Component {
                         id={item.id}
                         style={styles.media}
                         image={item.media_url}
-                        title="Choose only one master - NATURE"
+                        title=""
                         onClick={this.handleOpenImageModal}
                     />
                     </GridListTile>
@@ -283,8 +282,8 @@ class Profile extends Component {
                     <div style={{display:'flex',flexDirection:'row',backgroundColor: "#fff",width:'70%',height:'70%'}}>
                       <div style={{width:'50%',padding:10}}>
                         <img style={{height:'100%',width:'100%'}}
-                          src={this.state.currentItem.images.standard_resolution.url}
-                          alt={this.state.currentItem.caption.text} />
+                          src={this.state.mediaData.media_url}
+                          alt={this.state.currentItem.caption} />
                       </div>
 
                       <div style={{display:'flex', flexDirection:'column', width:'50%', padding:10}}>
@@ -300,10 +299,10 @@ class Profile extends Component {
                         <div style={{display:'flex', height:'100%', flexDirection:'column', justifyContent:'space-between'}}>
                           <div>
                             <Typography component="p">
-                              {this.state.currentItem.caption.text}
+                              {this.state.currentItem.caption}
                             </Typography>
                             <Typography style={{color:'#4dabf5'}} component="p" >
-                              {hashTags.join(' ')}
+                                #Nature #Earth #Peace
                             </Typography>
                             {this.state.comments.hasOwnProperty(this.state.currentItem.id) && this.state.comments[this.state.currentItem.id].map((comment, index)=>{
                               return(
@@ -321,16 +320,16 @@ class Profile extends Component {
                           <div>
                             <div className="row">
                               <IconButton aria-label="Add to favorites" onClick={this.likeClickHandler.bind(this,this.state.currentItem.id)}>
-                                {this.state.likeSet.has(this.state.currentItem.id) && <FavoriteIconFill style={{color:'#F44336'}}/>}
-                                {!this.state.likeSet.has(this.state.currentItem.id) && <FavoriteIconBorder/>}
+                                {this.state.isLiked && <FavoriteIconFill style={{color:'#F44336'}}/>}
+                                {!this.state.isLiked && <FavoriteIconBorder/>}
                               </IconButton>
                               <Typography component="p">
-                                {this.state.currentItem.likes.count} Likes
+                                  {likeCount} likes
                               </Typography>
                             </div>
                             <div className="row">
                               <FormControl style={{flexGrow:1}}>
-                                <InputLabel htmlFor="comment">Add Comment</InputLabel>
+                                <InputLabel htmlFor="comment">Add a comment</InputLabel>
                                 <Input id="comment" value={this.state.currentComment} onChange={this.commentChangeHandler}/>
                               </FormControl>
                               <FormControl>

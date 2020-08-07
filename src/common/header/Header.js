@@ -75,9 +75,13 @@ class Header extends Component{
     return (<div>
         <AppBar className={classes.appHeader}>
           <Toolbar>
+            { /*   Here, we are displaying logo Image Viewer on all the 3 pages : Login, Home, Profile pages */ }
+
             {(screen === "Login" || screen === "Home") && <span className="header-logo">Image Viewer</span>}
             {(screen === "Profile") && <Link style={{ textDecoration: 'none', color: 'white' }} to="/home"><span className="header-logo">Image Viewer</span></Link>}
             <div className={classes.grow}/>
+
+            { /*   Here, we are checking if the UI page is Home page, then display Search bar */ }
             {(screen === "Home") &&
               <div className={classes.search}>
                 <div className={classes.searchIcon}>
@@ -88,6 +92,8 @@ class Header extends Component{
                   }}/>
               </div>
             }
+
+            { /*   Here, we are checking if the UI page is Home or Profile page, then display Profile icon */ }
             {(screen === "Home" || screen === "Profile")  &&
               <div>
                 <IconButton onClick={this.handleClick}>
@@ -107,6 +113,8 @@ class Header extends Component{
                     horizontal: 'left',
                   }}>
                     <div style={{padding:'5px'}}>
+
+                      { /*   If the UI page is Home page, then drop down on the profile icon should display 2 options : 1. My Account 2. Logout */ }
                       { (screen === "Home") &&
                         <div>
                           <MenuItem onClick={this.handleAccount}>My Account</MenuItem>
@@ -130,11 +138,13 @@ class Header extends Component{
   }
 
   handleAccount = ()=>{
+    // Perform navigate to Profile page by clicking on My Account dropdown action
     this.props.handleAccount();
     this.handleClose();
   }
 
   handleLogout = ()=>{
+    // Perform logout operation
     this.props.handleLogout();
     this.handleClose();
   }
